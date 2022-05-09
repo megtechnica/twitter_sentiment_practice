@@ -13,7 +13,7 @@ class TwitterAuthenticator():
     def authenticate_twitter_app(self):
         authenticate = OAuthHandler(config['CONSUMER_KEY'], config['CONSUMER_SECRET'])
         authenticate.set_access_token(config['ACCESS_TOKEN'], config['ACCESS_TOKEN_SECRET'])
-
+        return authenticate
 
 class TwitterStreamer():
     def __init__(self):
@@ -41,6 +41,9 @@ class TwitterListener(Stream):
         return True
 
     def on_error(self, status):
+        if status == 420:
+            # return false on_data method in case rate limit is reached
+            return False
         print(status)
 
 
