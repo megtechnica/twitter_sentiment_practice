@@ -1,0 +1,48 @@
+import tweepy
+import json
+from textblob import TextBlob
+from wordcloud import WordCloud
+import pandas as pd
+import numpy as np
+import re
+import matplotlib.pyplot as plt
+
+# config contains api keys and secrets.
+config = open('config.json')
+config = json.load(config)
+
+# create the authentication object
+authenticate = tweepy.OAuthHandler(config['CONSUMER_KEY'], config['CONSUMER_SECRET'])
+
+# set the access token and access token secret
+authenticate.set_access_token(config['ACCESS_TOKEN'], config['ACCESS_TOKEN_SECRET'])
+
+# create the api object while passing in the auth information
+api = tweepy.API(authenticate, wait_on_rate_limit=True)
+
+# create a tweepy client using bearer token
+client = tweepy.Client(config['BEARER_TOKEN'])
+
+# search for recent tweets
+tweets_query = 'covid covid19'
+print(client.search_recent_tweets(tweets_query))
+
+# create a stream listener
+class CustomListener(tweepy.StreamingClient):
+    def on_data(self, raw_data):
+        self.process_data(raw_data)
+        return True
+
+    def process_data(self, raw_data):
+        print(raw_data)
+
+    def on_error(self, status_code):
+        if status_code == 420:
+            return False
+
+
+# Create a stream
+stream = tweepy.Stream(config['CONSUMER_KEY'], config['CONSUMER_SECRET'], config['ACCESS_TOKEN'], config['ACCESS_TOKEN_SECRET'])
+print(stream.running)
+print(stream.session)
+print()
