@@ -1,5 +1,5 @@
-  from tweepy.streaming import Stream
-
+from tweepy.streaming import Stream
+from tweepy import api
 from tweepy import OAuthHandler
 from tweepy import Stream
 
@@ -8,16 +8,25 @@ import json
 config = open('config.json')
 config = json.load(config)
 
-class TwitterStreamer():
-    # streams and processes live tweets
-    def stream_tweets(self, fetched_tweets_filename, hash_tag_list):
-        listener = StdOutListener()
+class TwitterAuthenticator():
+    # class for authenticating to twitter
+    def authenticate_twitter_app(self):
         authenticate = OAuthHandler(config['CONSUMER_KEY'], config['CONSUMER_SECRET'])
         authenticate.set_access_token(config['ACCESS_TOKEN'], config['ACCESS_TOKEN_SECRET'])
+
+
+class TwitterStreamer():
+    def __init__(self):
+        self.twitter_authenticator = TwitterAuthenticator()
+
+    # streams and processes live tweets
+    def stream_tweets(self, fetched_tweets_filename, hash_tag_list):
+        listener = TwitterListener(fetched_tweets_filename)
+        authenticate = self.twitter_authenticator.authenticate_twitter_app()
         stream = Stream(authenticate, listener)
         stream.filter(track=['covid 19', 'covid', 'covid-19'])
 
-class StdOutListener(Stream):
+class TwitterListener(Stream):
     # basic listener class
     def __init__(self, fetched_tweets_filename):
         self.fetched_tweets_filename = fetched_tweets_filename
